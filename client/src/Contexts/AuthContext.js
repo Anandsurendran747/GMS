@@ -6,43 +6,35 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState({
-        usertype: '',
-        userid: null,
-    });
+    const [user, setUser] = useState(null);
     useEffect(() => {
-        const storedToken = async () => {
-            const token = await localStorage.getItem("token");
-            if (token) setToken(token);
+        const checkUser = async () => {
+            const user = await localStorage.getItem("user");
+            if (user) setUser(JSON.parse(user));
             setLoading(false);
         };
-        storedToken();
+        checkUser();
     }, []);
 
-    const setUserData = async (userData) => {
-       await localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
-    }
 
-    
 
-    const login = async (token) => {
-        localStorage.setItem("token", token);
-        setToken(token);
+
+
+    const login = async (user) => {
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
     };
 
     const logout = () => {
-        localStorage.removeItem("token");
+        // localStorage.removeItem("token");
         localStorage.removeItem("user");
-        setToken(null);
         setLoading(false);
-        setUser({ usertype: '', userdata: {} });
+        setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ token, login, logout, loading ,user,  setUserData}}>
+        <AuthContext.Provider value={{ login, logout, loading, user }}>
             {children}
         </AuthContext.Provider>
     );

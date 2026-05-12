@@ -28,7 +28,7 @@ const ManagePlan = () => {
 
     return (
         <ManagePlanContainer>
-            <AddPlanButton onClick={() => navigate('/gym/add-plan')}>
+            <AddPlanButton onClick={() => navigate('/gym/dashboard/add-plan')}>
                 Add New Plan
             </AddPlanButton>
             <ViewPlansContainer>
@@ -57,7 +57,7 @@ const ManagePlanContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgb(12, 61, 66);
+    background-color: #f0f2f5;
     padding: 20px;
     height: 100vh;
 `;

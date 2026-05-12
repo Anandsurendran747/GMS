@@ -37,6 +37,9 @@ const MemberSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'inactive', 'expired'],
         default: 'active'
+    },
+    trainerId: {
+        type: String
     }
 }, {
     timestamps: true

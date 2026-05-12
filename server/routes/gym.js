@@ -5,6 +5,7 @@ const User = require('../Models/User');
 const jwt = require("jsonwebtoken");
 const Member = require('../Models/Member');
 const auth = require('../middlewares/auth');
+const Gym = require('../Models/Gym');
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     console.log(username);
@@ -18,28 +19,23 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
         const payload = {
-            id: user._id,
+            usertype: 'gym',
+            userId: user._id,
             username: user.username,
             gymId: user.gymId
         };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "1d"
+        const token = jwt.sign(
+            { id: 1, role: "gym" },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
         });
+        return res.status(200).json({ message: 'Login successful', user: payload });
 
-        return res.status(200).json({ message: 'Login successful', user: payload, token });
-
-        // User.findOne({ username, password: hashedPassword })
-        //     .then(user => {
-        //         if (user) {
-        //             res.status(200).json({ message: 'Login successful', user });
-        //         } else {
-        //             res.status(401).json({ message: 'Invalid credentials' });
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.error('Error during login:', err);
-        //         res.status(500).json({ message: 'Server error', error: err.message });
-        //     });
     } catch (error) {
         console.error('Error during login:1', error);
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -65,6 +61,8 @@ router.post('/add-member', auth, async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+
+
 
 router.get('/members', auth, async (req, res) => {
     const { gymId } = req.query;
@@ -284,11 +282,50 @@ router.post('/add-expense', auth, async (req, res) => {
     }
 });
 
-router.get("/dashboard", auth, (req, res) => {
-    res.json({
-        msg: "Protected data",
-        user: req.user
-    });
+router.get("/dashboard", auth, async (req, res) => {
+
+    const { userId } = req.query;
+    try {
+        var gymId = await User.findById({ _id: userId }).select('gymId');
+        gymId = gymId.gymId;
+        console.log(gymId);
+        const memberCountPromise = await Member.countDocuments({ gymId });
+
+        const activeMemberCountPromise = await Member.countDocuments({ gymId, active: true });
+        const expiredMemberCountPromise = await Member.countDocuments({ gymId, active: false });
+        const plansPromise = await Plans.find({ gymId });
+        const gym = await Gym.findById({ _id: gymId });
+        const gymData = {
+            name: gym.name,
+            ownerName: gym.ownerName,
+            phone: gym.phone,
+            place: gym.place,
+            memberCount: memberCountPromise,
+            activeMemberCount: activeMemberCountPromise,
+            expiredMemberCount: expiredMemberCountPromise,
+            plans: plansPromise
+        };
+        res.status(200).json({ gymData });
+    } catch (error) {
+        console.error('Error fetching dashboard data:1', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+
+
+
+});
+
+router.get('/numberofmembers', auth, async (req, res) => {
+    const { gymId } = req.query;
+    console.log(gymId);
+    try {
+        const memberCount = await Member.countDocuments({ gymId });
+        res.status(200).json({ memberCount });
+    }
+    catch (error) {
+        console.error('Error fetching member count:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 });
 
 

@@ -12,6 +12,9 @@ import AddMember from './Pages/Gym/AddMember';
 import ManagePlan from './Pages/Gym/ManagePlan';
 import AddPlan from './Pages/Gym/AddPlan';
 import ManageMembers from './Pages/Gym/ManageMembers';
+import ManageTrainers from './Pages/Gym/ManageTrainers';
+import Unauthorized from './Pages/Unauthorized';
+import DashBoardMain from './Containers.jsx/DashBoardMain';
 
 function App() {
   return (
@@ -20,13 +23,17 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Login />} />
-            <Route path="/admin/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-            <Route path="/gym/dashboard" element={<PrivateRoute><GymDashboard /></PrivateRoute>} />
-            <Route path="/admin/add-gym" element={<PrivateRoute><AddGym/></PrivateRoute>} />
-            <Route path="/gym/add-member" element={<PrivateRoute><AddMember/></PrivateRoute>} />
-            <Route path="/gym/manage-plans" element={<PrivateRoute><ManagePlan /></PrivateRoute>} />
-            <Route path="/gym/add-plan" element={<PrivateRoute><AddPlan /></PrivateRoute>} />
-            <Route path="/gym/manage-members" element={<PrivateRoute><ManageMembers /></PrivateRoute>} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/admin/dashboard" element={<PrivateRoute allowedRoles={['admin']}><AdminDashboard /></PrivateRoute>} />
+            <Route path="/admin/add-gym" element={<PrivateRoute allowedRoles={['admin']}><AddGym /></PrivateRoute>} />
+            <Route path="/gym/dashboard" element={<PrivateRoute allowedRoles={['gym']}><GymDashboard /></PrivateRoute>} >
+              <Route path='' element={<PrivateRoute allowedRoles={['gym']}><DashBoardMain /></PrivateRoute>} />
+              <Route path="add-member" element={<PrivateRoute allowedRoles={['gym']}><AddMember /></PrivateRoute>} />
+              <Route path="manage-members" element={<PrivateRoute allowedRoles={['gym']}><ManageMembers /></PrivateRoute>} />
+              <Route path="manage-plans" element={<PrivateRoute allowedRoles={['gym']}><ManagePlan /></PrivateRoute>} />
+              <Route path="add-plan" element={<PrivateRoute allowedRoles={['gym']}><AddPlan /></PrivateRoute>} />
+              <Route path="manage-trainers" element={<PrivateRoute allowedRoles={['gym']}><ManageTrainers /></PrivateRoute>} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </AuthProvider>

@@ -49,7 +49,6 @@ const AddPlan = () => {
     return (
         <div>
             <AddPlanContainer>
-                <AddPlanTitle>Add New Plan</AddPlanTitle>
                 <AddPlanForm onSubmit={handleSubmit}>
                     <InputLabel>Plan Name</InputLabel>
                     <AddPlanInput
@@ -85,7 +84,7 @@ const AddPlanContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgb(12, 61, 66);
+    background-color: #f0f2f5;
     padding: 20px;
     height: 100vh;
 `;
@@ -119,11 +118,7 @@ const AddPlanButton = styled.button`
     }
 `;
 
-const AddPlanTitle = styled.h2`
-    text-align: center;
-    color: rgb(255, 255, 255);
-    margin-bottom: 20px;
-`;
+
 
 const InputLabel = styled.label`
     font-weight: bold;
@@ -131,10 +126,6 @@ const InputLabel = styled.label`
     display: block;
     color: rgb(12, 61, 66);
 `;
-const AddPlanSubContainer = styled.div`
-    background-color: white;
-    padding: 5px;
-    border-radius: 8px;
-`;
+
 
 export default AddPlan

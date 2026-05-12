@@ -1,38 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import api from '../../api';
-import { useNavigate } from 'react-router-dom';
 
 
-const ManageMembers = () => {
-    const [members, setMembers] = useState([]);
+const ManageTrainers = () => {
+    const [trainers, setTrainers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-    const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch members from your API or data source
-        const fetchMembers = async () => {
+        // Fetch trainers from your API or data source
+        const fetchTrainers = async () => {
             try {
-                const response = await api.get('/gym/members', {
+                const response = await api.get('/gym/trainers', {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                     params: {
                         gymId: JSON.parse(localStorage.getItem("user")).userid
                     }
                 });
-                await setMembers(response.data.members ? response.data.members : []);
-                console.log(members);
+                await setTrainers(response.data.trainers ? response.data.trainers : []);
+                console.log(trainers);
             } catch (error) {
-                console.error('Error fetching members:', error);
+                console.error('Error fetching trainers:', error);
             }
         };
 
-        fetchMembers();
+        fetchTrainers();
     }, []);
 
-    const totalPages = Math.ceil(members.length / itemsPerPage);
+    const totalPages = Math.ceil(trainers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedMembers = members.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedTrainers = trainers.slice(startIndex, startIndex + itemsPerPage);
 
     const handleNextPage = () => {
         if (currentPage < totalPages) {
@@ -45,41 +43,40 @@ const ManageMembers = () => {
             setCurrentPage(currentPage - 1);
         }
     };
+
     return (
-        <ManageMembersContainer>
-            <ActionBtn onClick={() => navigate('/gym/dashboard/add-member')} $primary>
-                + Add New Member
-            </ActionBtn>
-            <ViewMembersContainer>
-                <MembersTable>
+        <ManageTrainersContainer>
+            <ViewTrainersContainer>
+                <TrainersTable>
                     <thead>
                         <tr>
                             <th>Number</th>
                             <th>Name</th>
-                            <th>Phone</th>
-                            <th>Place</th>
+                            <th>Specialization</th>
+                            <th>Experience</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedMembers.length > 0 ? (
-                            paginatedMembers.map((member, index) => (
-                                <tr key={member._id}>
+                        {paginatedTrainers.length > 0 ? (
+                            paginatedTrainers.map((trainer, index) => (
+                                <tr key={trainer._id}>
                                     <td>#{startIndex + index + 1}</td>
-                                    <td>{member.name}</td>
-                                    <td>{member.phone}</td>
-                                    <td>{member.place}</td>
+                                    <td>{trainer.name}</td>
+                                    <td>{trainer.specialization}</td>
+                                    <td>{trainer.experience}</td>
+                                    <td>{trainer.availability}</td>
                                     <td style={{ display: 'flex', gap: '10px' }}>
-                                        <EditMemberButton>Edit</EditMemberButton>
-                                        <DeleteMemberButton>Delete</DeleteMemberButton>
+                                        <EditTrainerButton>Edit</EditTrainerButton>
+                                        <DeleteTrainerButton>Delete</DeleteTrainerButton>
                                     </td>
                                 </tr>
                             ))
                         ) : (
-                            <tr><td colSpan="5" style={{textAlign: 'center', padding: '20px'}}>No members to display. Please add members to manage them.</td></tr>
+                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>No trainers to display. Please add trainers to manage them.</td></tr>
                         )}
                     </tbody>
-                </MembersTable>
+                </TrainersTable>
                 <PaginationContainer>
                     <PaginationButton onClick={handlePreviousPage} disabled={currentPage === 1}>
                         Previous
@@ -89,25 +86,12 @@ const ManageMembers = () => {
                         Next
                     </PaginationButton>
                 </PaginationContainer>
-            </ViewMembersContainer>
-        </ManageMembersContainer>
+            </ViewTrainersContainer>
+        </ManageTrainersContainer>
     )
 }
-const ActionBtn = styled.button`
-    
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: ${(props) => (props.$primary ? 'rgb(84, 129, 136)' : '#6c757d')};
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    &:hover {
-        background-color: ${(props) => (props.$primary ? 'rgb(12, 61, 66)' : '#5a6268')};
-    }
-`;
 
-const ManageMembersContainer = styled.div`
+const ManageTrainersContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,7 +99,7 @@ const ManageMembersContainer = styled.div`
     padding: 20px;
     height: 100vh;
 `;
-const MembersTable = styled.table`
+const TrainersTable = styled.table`
   width: 100%;
   min-width: 600px;
   border-collapse: collapse;
@@ -177,7 +161,7 @@ const PageInfo = styled.span`
     color: white;
 `;
 
-const ViewMembersContainer = styled.div`
+const ViewTrainersContainer = styled.div`
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -193,7 +177,7 @@ const ViewMembersContainer = styled.div`
     }
 `;
 
-const EditMemberButton = styled.button`
+const EditTrainerButton = styled.button`
     padding: 10px;
     font-size: 16px;
     background-color: rgb(84, 129, 136);
@@ -206,7 +190,7 @@ const EditMemberButton = styled.button`
     }
 `;
 
-const DeleteMemberButton = styled.button`
+const DeleteTrainerButton = styled.button`
     padding: 10px;
     font-size: 16px;
     background-color: #dc3545;
@@ -219,4 +203,4 @@ const DeleteMemberButton = styled.button`
     }
 `;
 
-export default ManageMembers
+export default ManageTrainers

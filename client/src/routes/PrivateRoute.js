@@ -2,11 +2,17 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Contexts/AuthContext";
 
-export default function PrivateRoute({ children }) {
-  const { token, loading } = useAuth();
+export default function PrivateRoute({ children, allowedRoles }) {
+  const { user, loading } = useAuth();
+  console.log("PrivateRoute user:", user);
   if (loading) return <div>Loading...</div>;
-  if (!token) {
+  if (!user) {
     return <Navigate to="/" />;
+  }
+
+  // Role check
+  if (allowedRoles && !allowedRoles.includes(user.usertype)) {
+    return <Navigate to="/unauthorized" />;
   }
 
   return children;

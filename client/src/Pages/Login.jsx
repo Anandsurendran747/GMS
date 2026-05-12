@@ -10,7 +10,7 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login, setUserData } = useAuth();
+  const { login } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,12 +33,8 @@ const Login = () => {
         try {
           const response = await api.post('/admin/login', { username, password });
           if (response.status === 200) {
-            if (response.data.token) {
-              await setUserData({
-                usertype: 'admin',
-                userid: response.data.user.id
-              });
-              await login(response.data.token);
+            if (response.data.user.usertype === 'admin') {
+              await login(response.data.user);
               navigate("/admin/dashboard");
             } else {
               alert("Login failed");
@@ -53,12 +49,12 @@ const Login = () => {
             const gymResponse = await api.post('/gym/login', { username, password });
             if (gymResponse.status === 200) {
               alert('Gym login successful: ' + gymResponse.data.message);
-              await setUserData({
-                usertype: 'gym',
-                userid: gymResponse.data.user.id
-              });
-              await login(gymResponse.data.token);
-              navigate("/gym/dashboard");
+              if (gymResponse.data.user.usertype === 'gym') {
+                await login(gymResponse.data.user);
+                navigate("/gym/dashboard");
+              } else {
+                alert("Gym login failed");
+              }
             } else {
               alert('Gym login failed: ' + gymResponse.data.message);
             }

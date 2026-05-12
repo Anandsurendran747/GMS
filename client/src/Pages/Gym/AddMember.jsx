@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import api from '../../api';
 import styled from 'styled-components';
 import { useAuth } from '../../Contexts/AuthContext';
@@ -7,7 +7,7 @@ import { useAuth } from '../../Contexts/AuthContext';
 const AddMember = () => {
     const { logout } = useAuth();
     const [formData, setFormData] = useState({
-        gymId: JSON.parse(localStorage.getItem("user")).userid,
+        userId: JSON.parse(localStorage.getItem("user")).userid,
         name: '',
         phone: '',
         advanceAmount: '',
@@ -66,7 +66,6 @@ const AddMember = () => {
 
     return (
         <AddMemberContainer>
-            <AddMemberTitle>Add Member</AddMemberTitle>
             <AddMemberForm onSubmit={handleSubmit}>
                 <AddMemberSubContainer>
                     <InputLabel>Name:</InputLabel>
@@ -110,7 +109,7 @@ const AddMemberContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgb(12, 61, 66);
+    background-color: #f0f2f5;
     height: 100vh;
 `;
 
@@ -150,11 +149,6 @@ const AddMemberButton = styled.button`
     }
 `;
 
-const AddMemberTitle = styled.h2`
-    text-align: center;
-    color: rgb(255, 255, 255);
-    margin-bottom: 20px;
-`;
 
 const InputLabel = styled.label`
     font-weight: bold;

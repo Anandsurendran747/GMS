@@ -7,11 +7,17 @@ const connectDB = require('./DB/connect');
 const cors = require('cors');
 const {initWhatsApp} = require('./Services/whatsapp-service');
 const startExpiryChecker = require('./Services/expiryChecker');
+const cookieParser = require("cookie-parser");
 // const sendSMS = require('./Services/sendSMS');
 
-app.use(cors());
+
 dotenv.config();
 
+app.use(cookieParser());
+app.use(cors({
+    credentials: true,
+    origin: 'http://localhost:3000'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/admin', adminRoutes);
