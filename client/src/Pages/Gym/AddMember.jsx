@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import api from '../../api';
 import styled from 'styled-components';
 import { useAuth } from '../../Contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 const AddMember = () => {
     const { logout } = useAuth();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        userId: JSON.parse(localStorage.getItem("user")).userid,
+        gymId: JSON.parse(localStorage.getItem("user")).gymId,
         name: '',
         phone: '',
         advanceAmount: '',
@@ -18,7 +20,7 @@ const AddMember = () => {
 
     const [plans, setPlans] = useState([]);
     useEffect(() => {
-        const gymId = JSON.parse(localStorage.getItem("user")).userid;
+        const gymId = JSON.parse(localStorage.getItem("user")).gymId;
         api.get(`/gym/plans/`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -57,6 +59,7 @@ const AddMember = () => {
             .then(response => {
                 console.log(response.data);
                 alert("Member added successfully!");
+                navigate('/gym/dashboard/manage-members');
             })
             .catch(error => {
                 console.error(error);

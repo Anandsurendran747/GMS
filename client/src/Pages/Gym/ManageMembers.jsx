@@ -17,7 +17,7 @@ const ManageMembers = () => {
                 const response = await api.get('/gym/members', {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                     params: {
-                        gymId: JSON.parse(localStorage.getItem("user")).userid
+                        gymId: JSON.parse(localStorage.getItem("user")).gymId
                     }
                 });
                 await setMembers(response.data.members ? response.data.members : []);

@@ -8,6 +8,13 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const [gymData, setGymData] = useState({
+        name: '',
+        ownerName: '',
+        phone: '',
+        place: '',
+        activeMemberCount: 0
+    });
     useEffect(() => {
         const checkUser = async () => {
             const user = await localStorage.getItem("user");
@@ -16,6 +23,10 @@ export const AuthProvider = ({ children }) => {
         };
         checkUser();
     }, []);
+
+    const fixGymData = async (data) => {
+        await setGymData(data);
+    }
 
 
 
@@ -34,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ login, logout, loading, user }}>
+        <AuthContext.Provider value={{ login, logout, loading, user, gymData, fixGymData }}>
             {children}
         </AuthContext.Provider>
     );

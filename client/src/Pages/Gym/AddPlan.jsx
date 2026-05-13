@@ -11,7 +11,7 @@ const AddPlan = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const gymId = JSON.parse(localStorage.getItem("user")).userid;
+        const gymId = JSON.parse(localStorage.getItem("user")).gymId;
         const planData = {
             gymId: gymId,
             name: formData.get('name'),
@@ -27,7 +27,7 @@ const AddPlan = () => {
                 .then(response => {
                     console.log(response.data);
                     alert("Plan added successfully!");
-                    navigate('/gym/manage-plans');
+                    navigate('/gym/dashboard/manage-plans');
                 }
                 )
                 .catch(error => {

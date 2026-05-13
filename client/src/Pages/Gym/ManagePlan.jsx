@@ -14,7 +14,7 @@ const ManagePlan = () => {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
                     },
                     params: {
-                        gymId: JSON.parse(localStorage.getItem("user")).userid
+                        gymId: JSON.parse(localStorage.getItem("user")).gymId
                     }
                 },);
                 await setPlans(response.data.plans);

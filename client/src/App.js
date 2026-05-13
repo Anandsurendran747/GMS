@@ -27,12 +27,13 @@ function App() {
             <Route path="/admin/dashboard" element={<PrivateRoute allowedRoles={['admin']}><AdminDashboard /></PrivateRoute>} />
             <Route path="/admin/add-gym" element={<PrivateRoute allowedRoles={['admin']}><AddGym /></PrivateRoute>} />
             <Route path="/gym/dashboard" element={<PrivateRoute allowedRoles={['gym']}><GymDashboard /></PrivateRoute>} >
-              <Route path='' element={<PrivateRoute allowedRoles={['gym']}><DashBoardMain /></PrivateRoute>} />
+              <Route index element={<PrivateRoute allowedRoles={['gym']}><DashBoardMain /></PrivateRoute>} />
               <Route path="add-member" element={<PrivateRoute allowedRoles={['gym']}><AddMember /></PrivateRoute>} />
               <Route path="manage-members" element={<PrivateRoute allowedRoles={['gym']}><ManageMembers /></PrivateRoute>} />
               <Route path="manage-plans" element={<PrivateRoute allowedRoles={['gym']}><ManagePlan /></PrivateRoute>} />
               <Route path="add-plan" element={<PrivateRoute allowedRoles={['gym']}><AddPlan /></PrivateRoute>} />
               <Route path="manage-trainers" element={<PrivateRoute allowedRoles={['gym']}><ManageTrainers /></PrivateRoute>} />
+              <Route path="unauthorized" element={<Unauthorized />} />
             </Route>
           </Routes>
         </BrowserRouter>

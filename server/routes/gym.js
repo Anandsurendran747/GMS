@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const Member = require('../Models/Member');
 const auth = require('../middlewares/auth');
 const Gym = require('../Models/Gym');
+const { default: mongoose } = require('mongoose');
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     console.log(username);
@@ -174,7 +175,7 @@ router.post('/renew-membership/:id', auth, async (req, res) => {
         }
         const expiryDate = new Date(paidDate);
         expiryDate.setMonth(expiryDate.getMonth() + 1);
-        Object.assign(gymRat, { paidDate, planId, expiryDate, active: true });
+        Object.assign(gymRat, { paidDate, planId, expiryDate, status: 'active' });
         await gymRat.save();
         res.status(200).json({ message: 'Membership renewed successfully', gymRat });
     }
@@ -284,15 +285,12 @@ router.post('/add-expense', auth, async (req, res) => {
 
 router.get("/dashboard", auth, async (req, res) => {
 
-    const { userId } = req.query;
+    const { gymId } = req.query;
     try {
-        var gymId = await User.findById({ _id: userId }).select('gymId');
-        gymId = gymId.gymId;
-        console.log(gymId);
         const memberCountPromise = await Member.countDocuments({ gymId });
 
-        const activeMemberCountPromise = await Member.countDocuments({ gymId, active: true });
-        const expiredMemberCountPromise = await Member.countDocuments({ gymId, active: false });
+        const activeMemberCountPromise = await Member.countDocuments({ gymId, status: 'active' });
+        const expiredMemberCountPromise = await Member.countDocuments({ gymId, status: 'expired' });
         const plansPromise = await Plans.find({ gymId });
         const gym = await Gym.findById({ _id: gymId });
         const gymData = {
@@ -315,18 +313,60 @@ router.get("/dashboard", auth, async (req, res) => {
 
 });
 
-router.get('/numberofmembers', auth, async (req, res) => {
+router.get('/monthly-revenue', auth, async (req, res) => {
     const { gymId } = req.query;
-    console.log(gymId);
     try {
-        const memberCount = await Member.countDocuments({ gymId });
-        res.status(200).json({ memberCount });
-    }
-    catch (error) {
-        console.error('Error fetching member count:', error);
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        console.log('Calculating monthly revenue for gymId:', gymId, 'from', firstDayOfMonth, 'to', lastDayOfMonth);
+
+        const monthlyRevenue = await Member.aggregate([
+            {
+                $match: {
+                    gymId: gymId,
+                    paidDate: {
+                        $gte: firstDayOfMonth,
+                        $lte: lastDayOfMonth
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    planObjectId: {
+                        $toObjectId: "$planId"
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "plans",
+                    localField: "planObjectId",
+                    foreignField: "_id",
+                    as: "planDetails"
+                }
+            },
+            {
+                $unwind: "$planDetails"
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: {
+                        $sum: "$planDetails.price"
+                    }
+                }
+            }
+        ]);
+        console.log('Monthly revenue calculated:', monthlyRevenue);
+        res.status(200).json({ monthlyRevenue: monthlyRevenue[0] ? monthlyRevenue[0].totalRevenue : 0 });
+    } catch (error) {
+        console.error('Error fetching monthly revenue:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+
+
 
 
 module.exports = router;

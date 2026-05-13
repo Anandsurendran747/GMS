@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled, { css } from "styled-components";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -49,11 +49,7 @@ const attendanceData = [
     { day: "Sun", current: 42, prev: 38 },
 ];
 
-const membershipData = [
-    { name: "Active", value: 85 },
-    { name: "Inactive", value: 10 },
-    { name: "Trial", value: 5 },
-];
+
 
 const PIE_COLORS = [theme.navy, theme.orange, "#f5a623"];
 
@@ -405,58 +401,54 @@ const PieName = styled.div`
   font-size: 11px;
   color: #aaa;
 `;
-
+const CheckInRow = styled.div`
+  display: contents;
+`;
 
 
 
 const DashBoardMain = () => {
 
-    const { logout } = useAuth();
-    const [gymData, setGymData] = useState(null);
+    const { logout, gymData } = useAuth();
     useEffect(() => {
-        api.get('/gym/dashboard', {
+        setStatCards(prev => {
+            const updated = [...prev];
+            updated[0] = { ...updated[0], value: gymData.memberCount };
+            return updated;
+        });
+        const activePercent = gymData.activeMemberCount / gymData.memberCount * 100;
+        const inactivePercent = gymData.inactiveMemberCount / gymData.memberCount * 100;
+        setMembershipData([
+            { name: "Active", value: activePercent },
+            { name: "Inactive", value: inactivePercent }
+        ]);
+
+        api.get('/gym/monthly-revenue', {
             params: {
-                userId: JSON.parse(localStorage.getItem("user"))?.userid
+                gymId: JSON.parse(localStorage.getItem("user"))?.gymId
             }
-        })
-            .then(response => {
-                console.log(response.data);
-                setGymData(response.data);
-            })
-            .catch(error => {
-                if (error.response && error.response.status === 401) {
-                    logout();
-                }
-                console.error('Error fetching admin dashboard data:', error.message);
-            });
-
-
-        api.get('/gym/numberofmembers', {
-            params: {
-                gymId: JSON.parse(localStorage.getItem("user"))?.userid
-            }
-        }).then(response => {
-            console.log(response.data);
-
+        }).then((response) => {
             setStatCards(prev => {
                 const updated = [...prev];
-                updated[0] = { ...updated[0], value: response.data.memberCount };
+                updated[3] = { ...updated[3], value: `₹${response.data.monthlyRevenue.toFixed(2)}` };
                 return updated;
             });
-        })
-            .catch(error => {
-                if (error.response && error.response.status === 401) {
-                    logout();
-                }
-                console.error('Error fetching number of members:', error.message);
-            })
+        }).catch(error => {
+            console.error('Error fetching monthly revenue:', error);
+        }
+        );
     }, []);
+
+    const [membershipData, setMembershipData] = useState([
+        { name: "Active", value: 0 },
+        { name: "Inactive", value: 0 }
+    ]);
 
     const [statCards, setStatCards] = useState([
         { label: "Total Members", value: 0, accent: true, icon: "👥" },
         { label: "Today's Check-ins", value: 0, icon: "📅" },
         { label: "Active Classes", value: 0, icon: "🏋️" },
-        { label: "Monthly Revenue", value: "$0", icon: "💵" },
+        { label: "Monthly Revenue", value: `₹0.00`, icon: "💵" },
         { label: "New Signups", value: 0, badge: "+12%", dot: "green", icon: "✨" },
     ]);
     return (
@@ -496,8 +488,10 @@ const DashBoardMain = () => {
                         </StatCard>
                     ))}
                 </StatsGrid>
-
+                    
                 {/* Middle row */}
+                
+                
                 <MidGrid>
                     {/* Classes */}
                     <Card>
@@ -546,7 +540,7 @@ const DashBoardMain = () => {
                             {checkIns.map((c, i) => {
                                 const isLast = i === checkIns.length - 1;
                                 return (
-                                    <>
+                                    <CheckInRow key={i}>
                                         <CheckInTime key={`t${i}`} $last={isLast}>{c.time}</CheckInTime>
                                         <CheckInCell key={`av${i}`} $last={isLast}>
                                             <MemberAvatar $first={i === 0}>{c.initials}</MemberAvatar>
@@ -555,7 +549,7 @@ const DashBoardMain = () => {
                                         <CheckInCell key={`s${i}`} $last={isLast}>
                                             <StatusBadge $status={c.status}>{c.status}</StatusBadge>
                                         </CheckInCell>
-                                    </>
+                                    </CheckInRow>
                                 );
                             })}
                         </CheckInGrid>

@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 // import styled from 'styled-components';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { css, createGlobalStyle } from "styled-components";
+import { useAuth } from '../../Contexts/AuthContext';
+import api from '../../api';
 
 
 // ─── Breakpoints ──────────────────────────────────────────────────────────────
@@ -381,8 +383,40 @@ const BottomNavLabel = styled.span`
 const bottomNavItems = navItems.slice(0, 5);
 
 export default function IronFitnessDashboard({ children }) {
+  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { gymData } = useAuth();
+
+  const { logout, fixGymData } = useAuth();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    async function fetchGymData() {
+      try {
+        const data = await api.get('/gym/dashboard', {
+          params: {
+            gymId: JSON.parse(localStorage.getItem("user"))?.gymId
+          }
+        });
+        fixGymData(data.data.gymData);
+      } catch (err) {
+        console.error("Failed to fetch gym data:", err);
+        if (err.response && err.response.status === 401) {
+          alert("Session expired. Please log in again.");
+          logout();
+        } else {
+          alert("Failed to fetch gym data: " + (err.response ? err.response.data.msg : err.message));
+        }
+      }finally {
+        setLoading(false);
+      }
+
+    }
+    fetchGymData();
+
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   const handleNav = (label) => {
     setActiveNav(label);
@@ -397,14 +431,16 @@ export default function IronFitnessDashboard({ children }) {
     }
     else if (label === "Dashboard") {
       navigate('/gym/dashboard');
+    } else {
+      navigate('/gym/dashboard/unauthorized');
     }
 
 
 
   };
 
-  const navigate = useNavigate();
   
+
 
 
   return (
@@ -442,7 +478,7 @@ export default function IronFitnessDashboard({ children }) {
 
           <UserCard>
             <UserLabel>LOGGED IN AS</UserLabel>
-            <UserName>Sarah Miller</UserName>
+            <UserName>{gymData?.name}</UserName>
             <UserRole>Manager</UserRole>
           </UserCard>
         </Sidebar>
@@ -468,10 +504,10 @@ export default function IronFitnessDashboard({ children }) {
                 🔔<NotifBadge>5</NotifBadge>
               </NotifWrapper> */}
               <ProfileRow>
-                <Avatar>SM</Avatar>
+                <Avatar>{gymData?.name?.charAt(0) || 'U'}</Avatar>
                 <ProfileMeta>
-                  <ProfileRole>Manager</ProfileRole>
-                  <ProfileName>Sarah Miller</ProfileName>
+                  {/* <ProfileRole>Manager</ProfileRole> */}
+                  <ProfileName>{gymData?.name}</ProfileName>
                 </ProfileMeta>
               </ProfileRow>
             </HeaderRight>
@@ -481,12 +517,7 @@ export default function IronFitnessDashboard({ children }) {
 
 
 
-          {activeNav !== "Dashboard" && activeNav !== "Members" && activeNav !== "Trainers" && activeNav !== "Plans" && (
-            <Body>
-              <PageTitle>{activeNav}</PageTitle>
-              <p style={{ marginTop: 12, color: "#666" }}>Content for {activeNav} will go here.</p>
-            </Body>
-          )}
+
 
           <Outlet />
 
